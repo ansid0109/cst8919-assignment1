@@ -7,7 +7,10 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+)
 logger = logging.getLogger("app")
 
 app = Flask(__name__)
@@ -57,6 +60,7 @@ async def profile():
     user = await auth0.get_user(g.store_options)
     
     if not user:
+        logger.warning("Attempt to access profile by authenticated user.")
         return redirect(url_for('login'))
     
     return render_template('profile.html', user=user)
@@ -65,8 +69,11 @@ async def profile():
 async def protected():
     """Another protected route - shows user info"""
     user = await auth0.get_user(g.store_options)
-    
-    if not user:
+
+    if user:
+        logger.info("Protected route accessed by: user_id=%s email=%s", user.get('sub'), user.get('email'))
+    else:
+        logger.warning("Attempt to access protected page by authenticated user.")
         return redirect(url_for('login'))
     
     return f"Hello, {user['name']}! This is a protected route."
