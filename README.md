@@ -1,4 +1,4 @@
-# CST8919 Lab 1: Auth0 Flask App
+# CST8919 Assignment 1
 
 **Student Name**: Anoop Sidhu
 **Student ID**: 040984994
@@ -8,11 +8,25 @@
 ---
 ## Demo Video
 
-🎥 [Watch Demo Video](https://youtu.be/J6jcpOFRtYg)
+🎥 [Watch Demo Video]()
 
 ## Description
 
 This is a small Flask application that uses Auth0 for login, profile access, and logout. Instructions for the complete application can be found [here](https://auth0.com/docs/quickstart/webapp/python).
+
+## KQL Query
+
+```
+AppServiceConsoleLogs
+| where TimeGenerated > ago(1h)
+| where ResultDescription has "Protected route accessed by"
+| extend UserId = extract(@"user_id=(\S+)", 1, ResultDescription)
+| extend Email = extract(@"email=(\S+)", 1, ResultDescription)
+| where isnotempty(UserId)
+| summarize AccessCount = count(), Emails = make_set(Email) by UserId, bin(TimeGenerated, 15m)
+| where AccessCount > 10
+| order by AccessCount desc
+```
 
 ## Prerequisites
 
